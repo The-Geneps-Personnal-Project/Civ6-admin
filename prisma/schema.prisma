@@ -9,3 +9,79 @@ generator client {
 datasource db {
   provider = "sqlite"
 }
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  name String?
+  email String @unique
+  role Role @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id Int @id @default(autoincrement())
+  name String
+  team Team @relation(fields: [teamId], references: [id])
+  teamId Int
+  gamePlayers GamePlayer[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Team {
+  id Int @id @default(autoincrement())
+  name String
+  players Player[]
+  firstPickGames Game[] @relation("FirstPick")
+  secondPickGames Game[] @relation("SecondPick")
+  gamePlayers GamePlayer[]
+  winnerGames Game[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Game {
+  id Int @id @default(autoincrement())
+  firstPick Team @relation("FirstPick", fields: [firstPickId], references: [id])
+  firstPickId Int
+  secondPick Team @relation("SecondPick", fields: [secondPickId], references: [id])
+  secondPickId Int
+  winner Team @relation(fields: [winnerId], references: [id])
+  winnerId Int
+  gameDate DateTime
+  players GamePlayer[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Civ {
+  id Int @id @default(autoincrement())
+  name String
+  description String?
+  gamePlayers GamePlayer[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GamePlayer {
+  id Int @id @default(autoincrement())
+  game Game @relation(fields: [gameId], references: [id])
+  gameId Int
+  player Player @relation(fields: [playerId], references: [id])
+  playerId Int
+  civ Civ @relation(fields: [civId], references: [id])
+  civId Int
+  team Team @relation(fields: [teamId], references: [id])
+  teamId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
