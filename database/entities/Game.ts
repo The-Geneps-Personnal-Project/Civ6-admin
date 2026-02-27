@@ -10,6 +10,7 @@ import {
 } from "typeorm";
 import type { Team } from "./Team";
 import type { GamePlayer } from "./GamePlayer";
+import type { Map } from "./Map";
 
 @Entity()
 export class Game {
@@ -36,6 +37,16 @@ export class Game {
 
   @Column()
   winnerId!: number;
+
+  @ManyToOne("Map", "games")
+  @JoinColumn({ name: "mapId" })
+  map?: Map;
+
+  @Column({ nullable: true })
+  mapId?: number;
+
+  @Column({ nullable: true })
+  draftLink?: string;
 
   @Column()
   gameDate!: Date;

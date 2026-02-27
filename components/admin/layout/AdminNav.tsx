@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, Shield, Globe, Gamepad2 } from "lucide-react";
+import { Users, Shield, Globe, Gamepad2, MapPin } from "lucide-react";
 
 const navItems = [
   { href: "/admin/teams", label: "Équipes", icon: Shield },
   { href: "/admin/players", label: "Joueurs", icon: Users },
   { href: "/admin/civs", label: "Civilisations", icon: Globe },
+  { href: "/admin/maps", label: "Cartes", icon: MapPin },
   { href: "/admin/games", label: "Parties", icon: Gamepad2 },
 ];
 

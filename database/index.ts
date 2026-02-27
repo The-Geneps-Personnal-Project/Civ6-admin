@@ -4,3 +4,4 @@ export { Team } from "./entities/Team";
 export { Game } from "./entities/Game";
 export { Civ } from "./entities/Civ";
 export { GamePlayer } from "./entities/GamePlayer";
+export { Map } from "./entities/Map";
