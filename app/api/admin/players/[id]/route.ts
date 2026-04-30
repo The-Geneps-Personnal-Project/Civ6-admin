@@ -4,11 +4,12 @@ import { Player } from "@/database/entities/Player";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { name, teamId } = await request.json();
-    const id = parseInt(params.id);
+    const { id: idParam } = await params;
+    const id = parseInt(idParam);
 
     const dataSource = await getDataSource();
     const playerRepo = dataSource.getRepository(Player);
@@ -33,10 +34,11 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idParam } = await params;
+    const id = parseInt(idParam);
 
     const dataSource = await getDataSource();
     const playerRepo = dataSource.getRepository(Player);

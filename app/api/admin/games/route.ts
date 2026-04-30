@@ -8,7 +8,7 @@ export async function GET() {
     const dataSource = await getDataSource();
     const gameRepo = dataSource.getRepository(Game);
     const games = await gameRepo.find({
-      relations: ["firstPick", "secondPick", "winner"],
+      relations: ["firstPick", "secondPick", "winner", "map"],
       order: { gameDate: "DESC" },
     });
     return NextResponse.json(games);
@@ -23,12 +23,19 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { firstPickId, secondPickId, winnerId, gameDate, players } =
-      await request.json();
+    const {
+      firstPickId,
+      secondPickId,
+      winnerId,
+      mapId,
+      draftLink,
+      gameDate,
+      players,
+    } = await request.json();
 
     if (!firstPickId || !secondPickId || !winnerId || !gameDate) {
       return NextResponse.json(
-        { error: "Tous les champs sont requis" },
+        { error: "Tous les champs obligatoires doivent être remplis" },
         { status: 400 },
       );
     }
@@ -41,6 +48,8 @@ export async function POST(request: Request) {
       firstPickId,
       secondPickId,
       winnerId,
+      mapId: mapId || undefined,
+      draftLink: draftLink || undefined,
       gameDate: new Date(gameDate),
     });
     await gameRepo.save(game);

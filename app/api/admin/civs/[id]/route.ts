@@ -4,11 +4,11 @@ import { Civ } from "@/database/entities/Civ";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { name, description } = await request.json();
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
     const dataSource = await getDataSource();
     const civRepo = dataSource.getRepository(Civ);
@@ -36,10 +36,10 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseInt((await params).id);
 
     const dataSource = await getDataSource();
     const civRepo = dataSource.getRepository(Civ);

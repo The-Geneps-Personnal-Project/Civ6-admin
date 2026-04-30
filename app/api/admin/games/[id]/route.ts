@@ -20,6 +20,7 @@ export async function GET(
         "firstPick",
         "secondPick",
         "winner",
+        "map",
         "players",
         "players.player",
         "players.civ",
@@ -49,8 +50,15 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { firstPickId, secondPickId, winnerId, gameDate, players } =
-      await request.json();
+    const {
+      firstPickId,
+      secondPickId,
+      winnerId,
+      mapId,
+      draftLink,
+      gameDate,
+      players,
+    } = await request.json();
     const { id: idParam } = await params;
     const id = parseInt(idParam);
 
@@ -69,6 +77,8 @@ export async function PUT(
     game.firstPickId = firstPickId;
     game.secondPickId = secondPickId;
     game.winnerId = winnerId;
+    game.mapId = mapId || undefined;
+    game.draftLink = draftLink || undefined;
     game.gameDate = new Date(gameDate);
     await gameRepo.save(game);
 
