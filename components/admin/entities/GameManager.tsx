@@ -21,15 +21,23 @@ interface Civ {
   name: string;
 }
 
+interface Map {
+  id: number;
+  name: string;
+}
+
 interface Game {
   id: number;
   firstPickId: number;
   secondPickId: number;
   winnerId: number;
+  mapId?: number;
+  draftLink?: string;
   gameDate: string;
   firstPick?: { name: string };
   secondPick?: { name: string };
   winner?: { name: string };
+  map?: { name: string };
   players?: GamePlayerData[];
   createdAt: string;
 }
@@ -56,6 +64,7 @@ export default function GameManager() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [civs, setCivs] = useState<Civ[]>([]);
+  const [maps, setMaps] = useState<Map[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -63,6 +72,8 @@ export default function GameManager() {
     firstPickId: "" as number | "",
     secondPickId: "" as number | "",
     winnerId: "" as number | "",
+    mapId: "" as number | "",
+    draftLink: "",
     gameDate: new Date().toISOString().split("T")[0],
   });
   const [newGamePlayers, setNewGamePlayers] = useState<GamePlayerForm[]>([]);
@@ -73,6 +84,8 @@ export default function GameManager() {
     firstPickId: "" as number | "",
     secondPickId: "" as number | "",
     winnerId: "" as number | "",
+    mapId: "" as number | "",
+    draftLink: "",
     gameDate: "",
   });
   const [editGamePlayers, setEditGamePlayers] = useState<GamePlayerForm[]>([]);
@@ -84,27 +97,64 @@ export default function GameManager() {
 
   const fetchData = async () => {
     try {
-      const [gamesRes, teamsRes, playersRes, civsRes] = await Promise.all([
-        fetch("/api/admin/games"),
-        fetch("/api/admin/teams"),
-        fetch("/api/admin/players"),
-        fetch("/api/admin/civs"),
-      ]);
-      const [gamesData, teamsData, playersData, civsData] = await Promise.all([
-        gamesRes.json(),
-        teamsRes.json(),
-        playersRes.json(),
-        civsRes.json(),
-      ]);
+      const [gamesRes, teamsRes, playersRes, civsRes, mapsRes] =
+        await Promise.all([
+          fetch("/api/admin/games"),
+          fetch("/api/admin/teams"),
+          fetch("/api/admin/players"),
+          fetch("/api/admin/civs"),
+          fetch("/api/admin/maps"),
+        ]);
+      const [gamesData, teamsData, playersData, civsData, mapsData] =
+        await Promise.all([
+          gamesRes.json(),
+          teamsRes.json(),
+          playersRes.json(),
+          civsRes.json(),
+          mapsRes.json(),
+        ]);
       setGames(gamesData);
-      setTeams(teamsData);
+      setTeams(sortTeamsWithPriority(teamsData));
       setPlayers(playersData);
       setCivs(civsData);
+      setMaps(mapsData);
     } catch (error) {
       console.error("Erreur:", error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const sortTeamsWithPriority = (teamsList: Team[]) => {
+    return [...teamsList].sort((a, b) => {
+      if (a.name === "TamarLaPote") return -1;
+      if (b.name === "TamarLaPote") return 1;
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  const sortPlayersWithPriority = (
+    playersList: Player[],
+    selectedTeamId?: number | "",
+  ) => {
+    const tamarTeam = teams.find((t) => t.name === "TamarLaPote");
+    const tamarTeamId = tamarTeam?.id;
+
+    return [...playersList].sort((a, b) => {
+      if (selectedTeamId) {
+        if (a.teamId === selectedTeamId && b.teamId !== selectedTeamId)
+          return -1;
+        if (a.teamId !== selectedTeamId && b.teamId === selectedTeamId)
+          return 1;
+      }
+
+      if (tamarTeamId) {
+        if (a.teamId === tamarTeamId && b.teamId !== tamarTeamId) return -1;
+        if (a.teamId !== tamarTeamId && b.teamId === tamarTeamId) return 1;
+      }
+
+      return a.name.localeCompare(b.name);
+    });
   };
 
   const openCreateModal = () => {
@@ -113,6 +163,8 @@ export default function GameManager() {
       firstPickId: "",
       secondPickId: "",
       winnerId: "",
+      mapId: "",
+      draftLink: "",
       gameDate: new Date().toISOString().split("T")[0],
     });
     setNewGamePlayers([]);
@@ -174,6 +226,8 @@ export default function GameManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newGame,
+          mapId: newGame.mapId || undefined,
+          draftLink: newGame.draftLink || undefined,
           players: newGamePlayers.filter(
             (p) => p.playerId && p.civId && p.teamId,
           ),
@@ -199,6 +253,8 @@ export default function GameManager() {
         firstPickId: fullGame.firstPickId,
         secondPickId: fullGame.secondPickId,
         winnerId: fullGame.winnerId,
+        mapId: fullGame.mapId || "",
+        draftLink: fullGame.draftLink || "",
         gameDate: fullGame.gameDate
           ? typeof fullGame.gameDate === "string"
             ? fullGame.gameDate.split("T")[0]
@@ -215,7 +271,8 @@ export default function GameManager() {
         })) || [],
       );
     } catch (error) {
-      console.error("Erreur:", error);
+      console.error("Erreur lors du chargement de la partie:", error);
+      alert("Erreur lors du chargement des détails de la partie");
     }
   };
 
@@ -242,6 +299,8 @@ export default function GameManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...editGame,
+          mapId: editGame.mapId || undefined,
+          draftLink: editGame.draftLink || undefined,
           players: editGamePlayers.filter(
             (p) => p.playerId && p.civId && p.teamId,
           ),
@@ -285,6 +344,11 @@ export default function GameManager() {
       render: (game: Game) => game.winner?.name || "-",
     },
     {
+      key: "map",
+      label: "Carte",
+      render: (game: Game) => game.map?.name || "-",
+    },
+    {
       key: "gameDate",
       label: "Date",
       render: (game: Game) =>
@@ -292,8 +356,12 @@ export default function GameManager() {
     },
   ];
 
-  const renderGamePlayersForm = (isEdit = false) => {
+  const renderGamePlayersForm = (
+    isEdit = false,
+    selectedTeamId?: number | "",
+  ) => {
     const gamePlayers = isEdit ? editGamePlayers : newGamePlayers;
+    const sortedPlayers = sortPlayersWithPriority(players, selectedTeamId);
 
     return (
       <div className="border-t pt-4">
@@ -324,6 +392,26 @@ export default function GameManager() {
               >
                 <div className="grid grid-cols-1 gap-2">
                   <select
+                    value={gp.teamId}
+                    onChange={(e) =>
+                      updateGamePlayer(
+                        index,
+                        "teamId",
+                        Number(e.target.value),
+                        isEdit,
+                      )
+                    }
+                    className="px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Sélectionner une équipe</option>
+                    {teams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
                     value={gp.playerId}
                     onChange={(e) =>
                       updateGamePlayer(
@@ -336,11 +424,15 @@ export default function GameManager() {
                     className="px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Sélectionner un joueur</option>
-                    {players.map((player) => (
-                      <option key={player.id} value={player.id}>
-                        {player.name}
-                      </option>
-                    ))}
+                    {sortPlayersWithPriority(players, gp.teamId).map(
+                      (player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name}
+                          {player.teamId &&
+                            ` (${teams.find((t) => t.id === player.teamId)?.name})`}
+                        </option>
+                      ),
+                    )}
                   </select>
 
                   <select
@@ -359,26 +451,6 @@ export default function GameManager() {
                     {civs.map((civ) => (
                       <option key={civ.id} value={civ.id}>
                         {civ.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={gp.teamId}
-                    onChange={(e) =>
-                      updateGamePlayer(
-                        index,
-                        "teamId",
-                        Number(e.target.value),
-                        isEdit,
-                      )
-                    }
-                    className="px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">Sélectionner une équipe</option>
-                    {teams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
                       </option>
                     ))}
                   </select>
@@ -431,7 +503,7 @@ export default function GameManager() {
         onClose={closeCreateModal}
         title="Nouvelle partie"
       >
-        <div className="space-y-4 max-h-96 overflow-y-auto">
+        <div className="space-y-4 max-h-[32rem] overflow-y-auto">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Date de la partie
@@ -442,6 +514,41 @@ export default function GameManager() {
               onChange={(e) =>
                 setNewGame({ ...newGame, gameDate: e.target.value })
               }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Carte
+            </label>
+            <select
+              value={newGame.mapId}
+              onChange={(e) =>
+                setNewGame({ ...newGame, mapId: Number(e.target.value) || "" })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Aucune carte sélectionnée</option>
+              {maps.map((map) => (
+                <option key={map.id} value={map.id}>
+                  {map.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Lien de la draft (optionnel)
+            </label>
+            <input
+              type="url"
+              value={newGame.draftLink}
+              onChange={(e) =>
+                setNewGame({ ...newGame, draftLink: e.target.value })
+              }
+              placeholder="https://..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -535,7 +642,7 @@ export default function GameManager() {
         onClose={closeEditModal}
         title="Modifier la partie"
       >
-        <div className="space-y-4 max-h-96 overflow-y-auto">
+        <div className="space-y-4 max-h-[32rem] overflow-y-auto">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Date de la partie
@@ -546,6 +653,44 @@ export default function GameManager() {
               onChange={(e) =>
                 setEditGame({ ...editGame, gameDate: e.target.value })
               }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Carte
+            </label>
+            <select
+              value={editGame.mapId}
+              onChange={(e) =>
+                setEditGame({
+                  ...editGame,
+                  mapId: Number(e.target.value) || "",
+                })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Aucune carte sélectionnée</option>
+              {maps.map((map) => (
+                <option key={map.id} value={map.id}>
+                  {map.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Lien de la draft (optionnel)
+            </label>
+            <input
+              type="url"
+              value={editGame.draftLink}
+              onChange={(e) =>
+                setEditGame({ ...editGame, draftLink: e.target.value })
+              }
+              placeholder="https://..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
