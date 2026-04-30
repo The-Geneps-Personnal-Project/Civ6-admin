@@ -10,7 +10,7 @@ import type { Player } from "./Player";
 import type { Game } from "./Game";
 import type { GamePlayer } from "./GamePlayer";
 
-@Entity()
+@Entity("team")
 export class Team {
   @PrimaryGeneratedColumn()
   id!: number;

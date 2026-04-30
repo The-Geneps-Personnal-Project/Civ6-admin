@@ -12,7 +12,7 @@ import type { Player } from "./Player";
 import type { Civ } from "./Civ";
 import type { Team } from "./Team";
 
-@Entity()
+@Entity("game_player")
 export class GamePlayer {
   @PrimaryGeneratedColumn()
   id!: number;

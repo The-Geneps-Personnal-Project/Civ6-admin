@@ -11,7 +11,7 @@ import {
 import type { Team } from "./Team";
 import type { GamePlayer } from "./GamePlayer";
 
-@Entity()
+@Entity("player")
 export class Player {
   @PrimaryGeneratedColumn()
   id!: number;

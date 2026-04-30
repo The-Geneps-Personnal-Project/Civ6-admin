@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import type { Game } from "./Game";
 
-@Entity()
+@Entity("map")
 export class Map {
   @PrimaryGeneratedColumn()
   id!: number;
