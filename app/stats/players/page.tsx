@@ -2,12 +2,10 @@ import { Users, Trophy, TrendingUp } from "lucide-react";
 import StatsCard from "@/components/stats/StatsCard";
 import WinRateBar from "@/components/stats/WinRateBar";
 import StatLayout from "@/components/stats/StatLayout";
-import _logger from "next-auth/utils/logger";
 
 async function getPlayersStats() {
-    _logger.log("Fetching players stats...");
     const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
-    _logger.log(`Base URL: ${baseUrl}`);
+    console.log("Base URL:", baseUrl);
     const res = await fetch(`${baseUrl}/api/stats/players`, {
         cache: "no-store",
     });
