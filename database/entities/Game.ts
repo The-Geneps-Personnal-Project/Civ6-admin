@@ -17,28 +17,28 @@ export class Game {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne("Team", "firstPickGames")
+  @ManyToOne("team", "firstPickGames")
   @JoinColumn({ name: "firstPickId" })
   firstPick!: Team;
 
   @Column()
   firstPickId!: number;
 
-  @ManyToOne("Team", "secondPickGames")
+  @ManyToOne("team", "secondPickGames")
   @JoinColumn({ name: "secondPickId" })
   secondPick!: Team;
 
   @Column()
   secondPickId!: number;
 
-  @ManyToOne("Team", "winnerGames")
+  @ManyToOne("team", "winnerGames")
   @JoinColumn({ name: "winnerId" })
   winner!: Team;
 
   @Column()
   winnerId!: number;
 
-  @ManyToOne("Map", "games")
+  @ManyToOne("map", "games")
   @JoinColumn({ name: "mapId" })
   map?: Map;
 
@@ -51,7 +51,7 @@ export class Game {
   @Column()
   gameDate!: Date;
 
-  @OneToMany("GamePlayer", "game")
+  @OneToMany("game_player", "game")
   players!: GamePlayer[];
 
   @CreateDateColumn()

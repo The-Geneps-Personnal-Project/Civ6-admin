@@ -19,14 +19,14 @@ export class Player {
   @Column()
   name!: string;
 
-  @ManyToOne("Team", "players")
+  @ManyToOne("team", "players")
   @JoinColumn({ name: "teamId" })
   team!: Team;
 
   @Column()
   teamId!: number;
 
-  @OneToMany("GamePlayer", "player")
+  @OneToMany("game_player", "player")
   gamePlayers!: GamePlayer[];
 
   @CreateDateColumn()

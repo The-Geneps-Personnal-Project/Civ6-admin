@@ -19,7 +19,7 @@ export class Civ {
   @Column({ nullable: true })
   description?: string;
 
-  @OneToMany("GamePlayer", "civ")
+  @OneToMany("game_player", "civ")
   gamePlayers!: GamePlayer[];
 
   @CreateDateColumn()

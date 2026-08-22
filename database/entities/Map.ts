@@ -16,7 +16,7 @@ export class Map {
   @Column()
   name!: string;
 
-  @OneToMany("Game", "map")
+  @OneToMany("game", "map")
   games!: Game[];
 
   @CreateDateColumn()

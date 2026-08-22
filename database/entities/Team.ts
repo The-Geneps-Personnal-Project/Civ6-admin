@@ -18,19 +18,19 @@ export class Team {
   @Column()
   name!: string;
 
-  @OneToMany("Player", "team")
+  @OneToMany("player", "team")
   players!: Player[];
 
-  @OneToMany("Game", "firstPick")
+  @OneToMany("game", "firstPick")
   firstPickGames!: Game[];
 
-  @OneToMany("Game", "secondPick")
+  @OneToMany("game", "secondPick")
   secondPickGames!: Game[];
 
-  @OneToMany("Game", "winner")
+  @OneToMany("game", "winner")
   winnerGames!: Game[];
 
-  @OneToMany("GamePlayer", "team")
+  @OneToMany("game_player", "team")
   gamePlayers!: GamePlayer[];
 
   @CreateDateColumn()

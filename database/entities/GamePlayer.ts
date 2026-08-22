@@ -17,28 +17,28 @@ export class GamePlayer {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @ManyToOne("Game", "players")
+  @ManyToOne("game", "players")
   @JoinColumn({ name: "gameId" })
   game!: Game;
 
   @Column()
   gameId!: number;
 
-  @ManyToOne("Player", "gamePlayers")
+  @ManyToOne("player", "gamePlayers")
   @JoinColumn({ name: "playerId" })
   player!: Player;
 
   @Column()
   playerId!: number;
 
-  @ManyToOne("Civ", "gamePlayers")
+  @ManyToOne("civ", "gamePlayers")
   @JoinColumn({ name: "civId" })
   civ!: Civ;
 
   @Column()
   civId!: number;
 
-  @ManyToOne("Team", "gamePlayers")
+  @ManyToOne("team", "gamePlayers")
   @JoinColumn({ name: "teamId" })
   team!: Team;
 
